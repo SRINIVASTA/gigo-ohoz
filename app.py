@@ -134,10 +134,10 @@ if uploaded_file is None:
     
     col1, col2 = st.columns(2)
     with col1:
-        st.info("#### ⚙️ In-Country Processing Features\n"
-                "* **Fuzzy Field Matcher:** Maps messy bank data layouts seamlessly.\n"
-                "* **Tax Splitter Engine:** Automatically extracts tax elements from composite totals based on chart configurations.\n"
-                "* **Zoho Vector Balancer:** Splits signed positive/negative structures into scalar payments and deposits fields.")
+        st.info(f"#### ⚙️ In-Country Processing Features\n"
+                f"* **Fuzzy Field Matcher:** Maps messy bank data layouts seamlessly.\n"
+                f"* **Tax Splitter Engine:** Automatically extracts tax elements from composite totals based on chart configurations.\n"
+                f"* **Zoho Vector Balancer:** Splits signed positive/negative structures into scalar payments and deposits fields.")
     with col2:
         st.info("#### 🛡️ Cloud-Native Security Design\n"
                 "* **Isolated Logic Architecture:** Script calculation structures are segregated from presentation modules.\n"
@@ -244,7 +244,7 @@ else:
         # ==============================================================================
         # 5. DATA GRIDS LAYOUT RECONCILIATION TABS
         # ==============================================================================
-        st.subheader("📋 GENERAL LEDGER VERIFICATION SHEETS & IMPORT GENERATION AUDIT")
+        st.subheader("📋 ZOHO BOOKS VERIFICATION SHEETS & IMPORT GENERATION AUDIT")
         tab1, tab2, tab3 = st.tabs([f"Zoho Books Import Layout ({st.session_state.tax_label})", "Balance Verification Audit", "Global Ledger Spend & Activity Sorter"])
         
         with tab1:
@@ -271,7 +271,7 @@ else:
                 
                 if pd.notnull(clicked_code) and clicked_code != 'TOTALS':
                     secrets_titles = st.secrets.get("group_titles", {})
-                    st.markdown(f"### 🎯 Underlying Transactions Sorter Preview for Account `[{clicked_code}] - {secrets_titles.get(clicked_code, 'Base Account')}`")
+                    st.markdown(f"### 🎯 Underlying Transactions Sorter Preview for Zoho Chart Account Code `[{clicked_code}] - {secrets_titles.get(clicked_code, 'Base Account')}`")
                     
                     tgt_logs_df = final_zoho_df[final_zoho_df['Zoho_Account_Code'] == clicked_code]
                     
@@ -293,7 +293,7 @@ else:
             
         st.markdown("---")
         st.download_button(
-            label=f"💾 Download Compiled Multi-Tab Zoho Reporting Package ({st.session_state.currency})",
+            label=f"💾 Download Compiled Multi-Tab Zoho Books Reporting Package (.XLSX)",
             data=buffer_memory_stream.getvalue(),
             file_name=f"Universal_Zoho_Purified_{st.session_state.currency}_Package.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
