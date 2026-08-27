@@ -106,11 +106,13 @@ def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
     secrets_lexicon = st.secrets.get("universal_lexicon", {})
     tax_rules = st.secrets.get("tax_jurisdictions", {})
 
+    # Inward/Outward default fallbacks
     account_code = "4999"
     
     if "SYSTEM_ALERT_NOTIFICATION" in text or "SECURITY CODE" in text:
         return "⚠️ System Alert Profile", "9999", "SYSTEM ALERT MATRIX", 0.0, "Exempt"
         
+    # Catch Cleaned Internal Sorters instantly
     if "PAYROLL" in text or "REMUNERATION" in text:
         account_code = "2000"
     elif "INTEREST" in text or "PROFIT CREDITED" in text:
@@ -120,6 +122,7 @@ def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
     elif "LIQUIDITY TRANSFER" in text or "CAPITAL/TRANSFER" in text or "LIABILITY SETTLEMENT" in text:
         account_code = "1050"
     else:
+        # Evaluate against token catalog
         matched = False
         for code, patterns in secrets_lexicon.items():
             if any(str(pattern).upper() in text for pattern in patterns):
@@ -229,9 +232,10 @@ def execute_universal_etl_pipeline(raw_df):
         for _, row in processed_df.iterrows()
     ]
     
-    processed_df['Zoho_Account_Code'] = [r for r in classification_results]
-    processed_df['Tax Rate'] = [float(r) for r in classification_results]
-    processed_df['Tax Name'] = [r for r in classification_results]
+    # 🛠️ CRITICAL TUPLE INDEX SLICING HOTFIX Applied Below:
+    processed_df['Zoho_Account_Code'] = [r[1] for r in classification_results]
+    processed_df['Tax Rate'] = [float(r[3]) for r in classification_results]  # Targets index 3 specifically
+    processed_df['Tax Name'] = [r[4] for r in classification_results]          # Targets index 4 specifically
     
     processed_df['Absolute_Gross'] = processed_df['Signed_Amount'].abs()
     processed_df['Net Amount'] = (processed_df['Absolute_Gross'] / (1.0 + processed_df['Tax Rate'])).round(2)
