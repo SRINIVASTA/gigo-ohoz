@@ -165,6 +165,9 @@ else:
         raw_input_df = None
 
     if raw_input_df is not None:
+        # 🧾 NEW STEP: Capture the absolute total rows inside the original Excel sheet
+        total_raw_excel_rows = len(raw_input_df)
+
         final_zoho_df, reconciliation_df, global_distribution_df, dynamic_layout_indices, signed_amounts_series = execute_universal_etl_pipeline(raw_input_df)
         
         grand_total_rows = int(global_distribution_df["Total_Row_Count"].sum())
@@ -184,18 +187,20 @@ else:
         display_distribution_df = pd.concat([global_distribution_df, totals_row], ignore_index=True)
 
         st.title(f"📊 Zoho Books Audit & Ingestion Workspace ({st.session_state.currency})")
-        st.markdown(f"Currently analyzing worksheet data matrix. Ingested profile table footprint contains **{grand_total_rows:,} records**.")
+        st.markdown(f"Currently analyzing worksheet data matrix. Raw spreadsheet blueprint contains **{total_raw_excel_rows:,} total rows**.")
 
         st.markdown(f"### 📋 GENERAL LEDGER PERFORMANCE RECONCILIATION CARDS ({st.session_state.currency})")
         kpi_container = st.container()
         with kpi_container:
             kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
             with kpi_col1:
-                st.metric(label="✨ Grand Sum Row Footprint", value=f"{grand_total_rows:,} Transactions")
+                # Displays the true source file footprint count
+                st.metric(label="📄 Total Raw Excel Rows", value=f"{total_raw_excel_rows:,} Rows")
             with kpi_col2:
-                st.metric(label="💰 Statement Net Cash-Flow", value=f"{st.session_state.currency} {signed_amounts_series.sum():,.2f}")
+                # Displays processed records after skipping headers/system noise
+                st.metric(label="✨ Cleaned Transactions", value=f"{grand_total_rows:,} Mapped")
             with kpi_col3:
-                st.metric(label="🧾 Extracted Tax Summary", value=f"{st.session_state.currency} {final_zoho_df['Tax Amount'].sum():,.2f}")
+                st.metric(label="💰 Net Cash-Flow", value=f"{st.session_state.currency} {abs(signed_amounts_series.sum()):,.2f}")
             with kpi_col4:
                 unmapped_rows = int(global_distribution_df[global_distribution_df['Zoho_Account_Code'] == '4999']['Total_Row_Count'].sum())
                 st.metric(label="⚠️ Unmapped Fallbacks", value=f"{unmapped_rows} Rows")
