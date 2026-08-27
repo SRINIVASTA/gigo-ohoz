@@ -19,7 +19,7 @@ def adaptive_monetary_parser(raw_value):
     match = re.search(currency_pattern, clean_str)
     target_text = match.group(1).strip() if match else clean_str
     
-    # Automatically switch punctuation if comma is used as decimal separator (Continental Europe)
+    # Automatically switch punctuation if comma is used as decimal separator
     if ',' in target_text and '.' in target_text:
         if target_text.rfind(',') > target_text.rfind('.'):
             target_text = target_text.replace('.', '').replace(',', '.')
@@ -63,7 +63,7 @@ def clean_adib_description(text):
     if not isinstance(text, str): return "UNCLASSIFIED LEDGER TRANSACTION"
     text_clean = text.strip()
     
-    # CRITICAL HOTFIX MATCHERS FOR ADIB INTERNALS
+    # 🌍 CRITICAL JURISDICTION NOTIFICATION MATCHERS
     if any(tk in text_clean.upper() for tk in ["HAS BEEN CREATED", "THANK YOU FOR OPENING", "REQUESTING A NEW CHEQUEBOOK"]):
         return "SYSTEM_ALERT_NOTIFICATION"
     if "SALARY OF" in text_clean.upper() or "YOUR SALARY OF" in text_clean.upper():
@@ -81,19 +81,20 @@ def clean_adib_description(text):
     if "WAS DEBITED FROM YOUR ACCOUNT" in text_clean.upper() or "WAS DEBITED" in text_clean.upper():
         return "DIRECT ACCOUNT LIQUIDITY TRANSFER OUTFLOW"
     
-    # Strip standard POS transaction prefixes to capture merchant footprints
+    # 1. Strip standard POS transaction prefixes to capture merchant footprints
     text_clean = re.sub(r'(?i)^Trx\.\s+of\s+[A-Z]{3}\s+[\d\.,]+\s+on\s+your\s+a/c\s+\**\d+\s+at\s+', '', text_clean)
     text_clean = re.sub(r'(?i)^Transaction\s+of\s+[A-Z]{3}\s+[\d\.,]+\s+debited\s+from\s+your\s+a/c\s+\**\d+\s+at\s+', '', text_clean)
     text_clean = re.sub(r'(?i)^Trx\.\s+of\s+[A-Z]{3}\s*[\d\.,]+\s+on\s+your\s+card\s+ending\s+\**\d+\s+at\s+', '', text_clean)
     text_clean = re.sub(r'(?i)^A\s+POS\s+Trxn\s+on\s+your\s+Account\s+No\s+\**\d+\s+at\s+', '', text_clean)
 
-    # Strip localized bank terminal operational suffixes
-    split_patterns = r'(?i)\.\s*Avl|\.\s*Your|\.Your|\s+on\s+\d{2}/\d{2}/\d{2,4}|\s+in\s+[A-Z]{2,3}\s+on|\s+is\s+Approved'
+    # 2. Strip localized bank terminal operational suffixes
+    split_patterns = r'(?i)\.\s*Avl|\.\s*Your|\.Your|\s+on\s+\d{2}/| in [A-Z]{2}\s+on|\s+is\s+Approved'
     parts = re.split(split_patterns, text_clean)
-    text_clean = parts
+    
+    # 🛠️ CRITICAL HOTFIX: Safely extract the string element from the array list output
+    text_clean = parts[0] if len(parts) > 0 else text_clean
         
     return text_clean.strip().upper()
-
 def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
     """Universal classification router with deep tax jurisdiction injection lookup."""
     if pd.isnull(sms_narrative) or str(sms_narrative).strip() == "":
@@ -105,13 +106,11 @@ def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
     secrets_lexicon = st.secrets.get("universal_lexicon", {})
     tax_rules = st.secrets.get("tax_jurisdictions", {})
 
-    # Inward/Outward default fallbacks
     account_code = "4999"
     
     if "SYSTEM_ALERT_NOTIFICATION" in text or "SECURITY CODE" in text:
         return "⚠️ System Alert Profile", "9999", "SYSTEM ALERT MATRIX", 0.0, "Exempt"
         
-    # Catch Cleaned Internal Sorters instantly
     if "PAYROLL" in text or "REMUNERATION" in text:
         account_code = "2000"
     elif "INTEREST" in text or "PROFIT CREDITED" in text:
@@ -121,7 +120,6 @@ def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
     elif "LIQUIDITY TRANSFER" in text or "CAPITAL/TRANSFER" in text or "LIABILITY SETTLEMENT" in text:
         account_code = "1050"
     else:
-        # Evaluate against token catalog
         matched = False
         for code, patterns in secrets_lexicon.items():
             if any(str(pattern).upper() in text for pattern in patterns):
@@ -208,7 +206,7 @@ def execute_universal_etl_pipeline(raw_df):
     else:
         processed_df['Signed_Amount'] = processed_df['Raw_Description'].apply(adaptive_monetary_parser)
         
-    # 🌟 MINUS/POSITIVE POLARITY INTERCEPTOR OVERRIDE BLOCK
+    # Enforce global balance sign corrections (Deductions to negative, Inflows to positive)
     deduction_triggers = ["debited", "withdrawal", "payment for", "trx. of", "transaction of"]
     processed_df['Signed_Amount'] = np.where(
         processed_df['Raw_Description'].str.contains('|'.join(deduction_triggers), case=False, na=False) & 
@@ -217,7 +215,6 @@ def execute_universal_etl_pipeline(raw_df):
         processed_df['Signed_Amount'].abs()
     )
     
-    # Explicit Statement Inflows Polarity Correction Override
     processed_df['Signed_Amount'] = np.where(
         processed_df['Raw_Description'].str.contains("credited|profit of|salary of", case=False, na=False),
         processed_df['Signed_Amount'].abs(),
