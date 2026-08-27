@@ -94,8 +94,9 @@ def clean_adib_description(text):
     text_clean = parts[0]
         
     return text_clean.strip().upper()
+
 def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
-    """Universal classification router with deep tax jurisdiction injection lookup."""
+    """Universal classification router with deep tax jurisdiction lookup."""
     if pd.isnull(sms_narrative) or str(sms_narrative).strip() == "":
         return "⚠️ Suspense Profile", "4999", "UNCLASSIFIED ROW", 0.0, "Exempt"
     text = str(sms_narrative).upper()
@@ -204,13 +205,11 @@ def execute_universal_etl_pipeline(raw_df):
     processed_df['Raw_Description'] = raw_text_series.fillna("Empty Ledger Line Log")
     processed_df['Description'] = processed_df['Raw_Description'].apply(clean_adib_description)
     
-    # Ingest baseline amount arrays
     if col_map['amount'] is not None:
         processed_df['Signed_Amount'] = raw_df.iloc[:, col_map['amount']].apply(adaptive_monetary_parser)
     else:
         processed_df['Signed_Amount'] = processed_df['Raw_Description'].apply(adaptive_monetary_parser)
         
-    # Enforce global balance sign corrections (Deductions to negative, Inflows to positive)
     deduction_triggers = ["debited", "withdrawal", "payment for", "trx. of", "transaction of"]
     processed_df['Signed_Amount'] = np.where(
         processed_df['Raw_Description'].str.contains('|'.join(deduction_triggers), case=False, na=False) & 
@@ -222,25 +221,24 @@ def execute_universal_etl_pipeline(raw_df):
     processed_df['Reference Number'] = raw_df.iloc[:, col_map['ref']] if col_map['ref'] is not None else ""
     processed_df['Payee/Vendor'] = raw_df.iloc[:, col_map['payee']] if col_map['payee'] is not None else "Global Ledger Account"
     
+    # 🏁 UNPACKING TUPLE UNIFIED PASSTHROUGH FIX
     classification_results = [
         generic_zoho_pipeline_classifier(row['Description'], row['Signed_Amount']) 
         for _, row in processed_df.iterrows()
     ]
     
-    processed_df['Zoho_Account_Code'] = [r for r in classification_results]
-    processed_df['Tax Rate'] = [r for r in classification_results]
-    processed_df['Tax Name'] = [r for r in classification_results]
+    # Safely unpack individual array indices from classification results tuple
+    processed_df['Zoho_Account_Code'] = [r[1] for r in classification_results]
+    processed_df['Tax Rate'] = [float(r[3]) for r in classification_results] # 🛠️ CRITICAL HOTFIX: Forced Type Casting to Float
+    processed_df['Tax Name'] = [r[4] for r in classification_results]
     
-    # Calculate backwards tax split matrices (Extracting Net Taxable Base vs Tax Value Component)
     processed_df['Absolute_Gross'] = processed_df['Signed_Amount'].abs()
     processed_df['Net Amount'] = (processed_df['Absolute_Gross'] / (1.0 + processed_df['Tax Rate'])).round(2)
     processed_df['Tax Amount'] = (processed_df['Absolute_Gross'] - processed_df['Net Amount']).round(2)
     
-    # Establish separate scalar vectors to match native Zoho layout parameters
     processed_df['Debit (Payments)'] = np.where(processed_df['Signed_Amount'] < 0, processed_df['Absolute_Gross'], 0.0)
     processed_df['Credit (Deposits)'] = np.where(processed_df['Signed_Amount'] > 0, processed_df['Absolute_Gross'], 0.0)
     
-    # Filter out empty baseline alert records to keep the accounting matrix pristine
     processed_df = processed_df[processed_df['Zoho_Account_Code'] != '9999']
     
     recon_df, global_dist_df = assemble_universal_audit_trail(processed_df)
