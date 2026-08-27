@@ -5,21 +5,21 @@ import re
 
 def adaptive_monetary_parser(raw_value):
     """
-    Resilient global currency parser. Cleans alphabetic descriptors (AED, USD, INR, GBP),
+    Resilient regular expression financial parser. Cleans currency prefixes (AED/USD),
     stray letters, transaction noise, and standardizes localized float notation structures.
     """
     if pd.isnull(raw_value): return 0.0
     if isinstance(raw_value, (int, float)): return float(raw_value)
     clean_str = str(raw_value).upper().strip()
     
-    # Strip operational masking noise and character arrays
+    # Strip operational masking noise and message character arrays
     clean_str = re.sub(r'\*\*\*\*\d+|\*\d+|\b\d{2}/\d{2}/\d{2,4}\b', '', clean_str)
     
     currency_pattern = r'(?:[A-Z]{3}|[\$€£₹]|TRX\.\s+OF|FOR|AED|USD|EUR|GBP|INR)\s*([-\d\.,]+)'
     match = re.search(currency_pattern, clean_str)
     target_text = match.group(1).strip() if match else clean_str
     
-    # Automatically switch punctuation if comma is used as decimal separator (Continental Europe)
+    # Automatically switch punctuation if comma is used as decimal separator
     if ',' in target_text and '.' in target_text:
         if target_text.rfind(',') > target_text.rfind('.'):
             target_text = target_text.replace('.', '').replace(',', '.')
@@ -55,32 +55,47 @@ def trace_file_column_indices(columns_list):
                 break
     return mapping
 
-def simplify_global_description(text):
-    """Isolates clean merchant names from chaotic transactional log strings."""
+def clean_adib_description(text):
+    """
+    Isolates clean vendor names from chaotic ADIB bank message text streams.
+    Transforms raw alert logs into structured accounting descriptions.
+    """
     if not isinstance(text, str): return "UNCLASSIFIED LEDGER TRANSACTION"
     text_clean = text.strip()
     
-    # Strip standard bank transactional alert prefixes globally
+    # CRITICAL HOTFIX MATCHERS FOR ADIB INTERNALS
+    if any(tk in text_clean.upper() for tk in ["HAS BEEN CREATED", "THANK YOU FOR OPENING", "REQUESTING A NEW CHEQUEBOOK"]):
+        return "SYSTEM ALERT NOTIFICATION"
+    if "SALARY OF" in text_clean.upper() or "YOUR SALARY OF" in text_clean.upper():
+        return "INTERNAL PAYROLL REMUNERATION INFLOW"
+    if "PROFIT OF" in text_clean.upper():
+        return "ADIB BANK INTEREST PROFIT CREDITED"
+    if "ATM CASH WITHDRAWAL" in text_clean.upper():
+        return "ATM VAULT LIQUID CASH DISBURSEMENT"
+    if "PAYMENT FOR YOUR COVERED CARD WAS DEBITED" in text_clean.upper():
+        return "INTERNAL COVERED CARD LIABILITY SETTLEMENT"
+        
+    # Check for flat transfer credits and debits
+    if "WAS CREDITED TO YOUR ACCOUNT" in text_clean.upper() or "WAS CREDITED" in text_clean.upper():
+        return "DIRECT SYSTEM CAPITAL/TRANSFER INFLOW"
+    if "WAS DEBITED FROM YOUR ACCOUNT" in text_clean.upper() or "WAS DEBITED" in text_clean.upper():
+        return "DIRECT ACCOUNT LIQUIDITY TRANSFER OUTFLOW"
+    
+    # Strip standard POS transaction prefixes to capture merchant footprints
     text_clean = re.sub(r'(?i)^Trx\.\s+of\s+[A-Z]{3}\s+[\d\.,]+\s+on\s+your\s+a/c\s+\**\d+\s+at\s+', '', text_clean)
     text_clean = re.sub(r'(?i)^Transaction\s+of\s+[A-Z]{3}\s+[\d\.,]+\s+debited\s+from\s+your\s+a/c\s+\**\d+\s+at\s+', '', text_clean)
     text_clean = re.sub(r'(?i)^Trx\.\s+of\s+[A-Z]{3}\s*[\d\.,]+\s+on\s+your\s+card\s+ending\s+\**\d+\s+at\s+', '', text_clean)
     text_clean = re.sub(r'(?i)^A\s+POS\s+Trxn\s+on\s+your\s+Account\s+No\s+\**\d+\s+at\s+', '', text_clean)
+    text_clean = re.sub(r'(?i)^Trx\.\s+of\s+[A-Z]{3}\s*[\d\.,]+\s+on\s+your\s+card\s+ending\s+\**\d+\s+at\s+', '', text_clean)
 
-    # Strip structural operational suffixes and tracking meta-tags
+    # Strip localized bank terminal operational suffixes
     split_patterns = r'(?i)\.\s*Avl|\.\s*Your|\.Your|\s+on\s+\d{2}/\d{2}/\d{2,4}|\s+in\s+[A-Z]{2,3}\s+on|\s+is\s+Approved'
     parts = re.split(split_patterns, text_clean)
     text_clean = parts[0]
-    
-    if any(tk in text_clean.upper() for tk in ["SALARY OF", "PAYROLL"]):
-        return "INTERNAL PAYROLL REMUNERATION INFLOW"
-    if any(tk in text_clean.upper() for tk in ["CREDITED", "INBOUND TRANSFER"]):
-        return "DIRECT SYSTEM CAPITAL/TRANSFER INFLOW"
-    if any(tk in text_clean.upper() for tk in ["WITHDRAWAL", "ATM CASH"]):
-        return "ATM VAULT LIQUID CASH DISBURSEMENT"
         
     return text_clean.strip().upper()
 def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
-    """Universal classification router with dynamic global chart-of-accounts and tax mappings."""
+    """Universal classification router with deep tax jurisdiction injection lookup."""
     if pd.isnull(sms_narrative) or str(sms_narrative).strip() == "":
         return "⚠️ Suspense Profile", "4999", "UNCLASSIFIED ROW", 0.0, "Exempt"
     text = str(sms_narrative).upper()
@@ -90,16 +105,23 @@ def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
     secrets_lexicon = st.secrets.get("universal_lexicon", {})
     tax_rules = st.secrets.get("tax_jurisdictions", {})
 
+    # Inward/Outward default fallbacks
     account_code = "4999"
     
-    if val == 0.0 or any(flag in text for flag in ["SECURITY CODE", "CREATED FOR YOU", "OPENING A NEW"]):
+    if "SYSTEM ALERT" in text or "SECURITY CODE" in text:
         return "⚠️ System Alert Profile", "9999", "SYSTEM ALERT MATRIX", 0.0, "Exempt"
-    if any(tk in text for tk in ["APPLE", "ITUNES"]): account_code = "8500"
-    elif "REVERSED" in text or "REFUND" in text: account_code = "4999"
-    elif abs(val) in [1.05, 1.20, 4.65]: account_code = "2500"
-    elif "SALARY" in text or "PAYROLL" in text: account_code = "2000"
+        
+    # Catch Cleaned Internal Sorters instantly
+    if "PAYROLL" in text or "REMUNERATION" in text:
+        account_code = "2000"
+    elif "INTEREST" in text or "PROFIT CREDITED" in text:
+        account_code = "2100"
+    elif "ATM" in text or "LIQUID CASH" in text:
+        account_code = "1000"
+    elif "LIQUIDITY TRANSFER" in text or "CAPITAL/TRANSFER" in text or "LIABILITY SETTLEMENT" in text:
+        account_code = "1050"
     else:
-        # Cross-reference transaction narrative blocks against cloud token entries
+        # Evaluate against token catalog
         matched = False
         for code, patterns in secrets_lexicon.items():
             if any(str(pattern).upper() in text for pattern in patterns):
@@ -167,7 +189,7 @@ def assemble_universal_audit_trail(df):
     return recon_df, global_matrix
 
 def execute_universal_etl_pipeline(raw_df):
-    """Parses dynamic columns, extracts international tax breakdowns, and maps to Zoho Books standards."""
+    """Parses dynamic columns, extracts global sales tax allocations, and configures Zoho sheets."""
     col_map = trace_file_column_indices(raw_df.columns)
     processed_df = pd.DataFrame()
     
@@ -180,7 +202,7 @@ def execute_universal_etl_pipeline(raw_df):
     raw_text_series = raw_df.iloc[:, raw_text_idx].astype(str)
     
     processed_df['Raw_Description'] = raw_text_series.fillna("Empty Ledger Line Log")
-    processed_df['Description'] = processed_df['Raw_Description'].apply(simplify_global_description)
+    processed_df['Description'] = processed_df['Raw_Description'].apply(clean_adib_description)
     
     # Ingest baseline amount arrays
     if col_map['amount'] is not None:
@@ -201,13 +223,13 @@ def execute_universal_etl_pipeline(raw_df):
     processed_df['Payee/Vendor'] = raw_df.iloc[:, col_map['payee']] if col_map['payee'] is not None else "Global Ledger Account"
     
     classification_results = [
-        generic_zoho_pipeline_classifier(row['Raw_Description'], row['Signed_Amount']) 
+        generic_zoho_pipeline_classifier(row['Description'], row['Signed_Amount']) 
         for _, row in processed_df.iterrows()
     ]
     
-    processed_df['Zoho_Account_Code'] = [r[1] for r in classification_results]
-    processed_df['Tax Rate'] = [r[3] for r in classification_results]
-    processed_df['Tax Name'] = [r[4] for r in classification_results]
+    processed_df['Zoho_Account_Code'] = [r for r in classification_results]
+    processed_df['Tax Rate'] = [r for r in classification_results]
+    processed_df['Tax Name'] = [r for r in classification_results]
     
     # Calculate backwards tax split matrices (Extracting Net Taxable Base vs Tax Value Component)
     processed_df['Absolute_Gross'] = processed_df['Signed_Amount'].abs()
@@ -218,8 +240,8 @@ def execute_universal_etl_pipeline(raw_df):
     processed_df['Debit (Payments)'] = np.where(processed_df['Signed_Amount'] < 0, processed_df['Absolute_Gross'], 0.0)
     processed_df['Credit (Deposits)'] = np.where(processed_df['Signed_Amount'] > 0, processed_df['Absolute_Gross'], 0.0)
     
-    # Filter out empty baseline spacer entries (such as administrative banking warnings)
-    processed_df = processed_df[(processed_df['Debit (Payments)'] > 0) | (processed_df['Credit (Deposits)'] > 0)]
+    # Filter out empty baseline alert records to keep the accounting matrix pristine
+    processed_df = processed_df[processed_df['Zoho_Account_Code'] != '9999']
     
     recon_df, global_dist_df = assemble_universal_audit_trail(processed_df)
     
