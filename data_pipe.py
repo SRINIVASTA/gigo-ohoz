@@ -5,21 +5,21 @@ import re
 
 def adaptive_monetary_parser(raw_value):
     """
-    Resilient regular expression financial parser. Cleans currency prefixes (AED/USD),
+    Resilient global currency parser. Cleans alphabetic descriptors (AED, USD, INR, GBP),
     stray letters, transaction noise, and standardizes localized float notation structures.
     """
     if pd.isnull(raw_value): return 0.0
     if isinstance(raw_value, (int, float)): return float(raw_value)
     clean_str = str(raw_value).upper().strip()
     
-    # Strip operational masking noise and message character arrays
+    # Strip operational masking noise and character arrays
     clean_str = re.sub(r'\*\*\*\*\d+|\*\d+|\b\d{2}/\d{2}/\d{2,4}\b', '', clean_str)
     
     currency_pattern = r'(?:[A-Z]{3}|[\$€£₹]|TRX\.\s+OF|FOR|AED|USD|EUR|GBP|INR)\s*([-\d\.,]+)'
     match = re.search(currency_pattern, clean_str)
     target_text = match.group(1).strip() if match else clean_str
     
-    # Automatically switch punctuation if comma is used as decimal separator
+    # Automatically switch punctuation if comma is used as decimal separator (Continental Europe)
     if ',' in target_text and '.' in target_text:
         if target_text.rfind(',') > target_text.rfind('.'):
             target_text = target_text.replace('.', '').replace(',', '.')
@@ -65,7 +65,7 @@ def clean_adib_description(text):
     
     # CRITICAL HOTFIX MATCHERS FOR ADIB INTERNALS
     if any(tk in text_clean.upper() for tk in ["HAS BEEN CREATED", "THANK YOU FOR OPENING", "REQUESTING A NEW CHEQUEBOOK"]):
-        return "SYSTEM ALERT NOTIFICATION"
+        return "SYSTEM_ALERT_NOTIFICATION"
     if "SALARY OF" in text_clean.upper() or "YOUR SALARY OF" in text_clean.upper():
         return "INTERNAL PAYROLL REMUNERATION INFLOW"
     if "PROFIT OF" in text_clean.upper():
@@ -86,17 +86,16 @@ def clean_adib_description(text):
     text_clean = re.sub(r'(?i)^Transaction\s+of\s+[A-Z]{3}\s+[\d\.,]+\s+debited\s+from\s+your\s+a/c\s+\**\d+\s+at\s+', '', text_clean)
     text_clean = re.sub(r'(?i)^Trx\.\s+of\s+[A-Z]{3}\s*[\d\.,]+\s+on\s+your\s+card\s+ending\s+\**\d+\s+at\s+', '', text_clean)
     text_clean = re.sub(r'(?i)^A\s+POS\s+Trxn\s+on\s+your\s+Account\s+No\s+\**\d+\s+at\s+', '', text_clean)
-    text_clean = re.sub(r'(?i)^Trx\.\s+of\s+[A-Z]{3}\s*[\d\.,]+\s+on\s+your\s+card\s+ending\s+\**\d+\s+at\s+', '', text_clean)
 
     # Strip localized bank terminal operational suffixes
     split_patterns = r'(?i)\.\s*Avl|\.\s*Your|\.Your|\s+on\s+\d{2}/\d{2}/\d{2,4}|\s+in\s+[A-Z]{2,3}\s+on|\s+is\s+Approved'
     parts = re.split(split_patterns, text_clean)
-    text_clean = parts[0]
+    text_clean = parts
         
     return text_clean.strip().upper()
 
 def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
-    """Universal classification router with deep tax jurisdiction lookup."""
+    """Universal classification router with deep tax jurisdiction injection lookup."""
     if pd.isnull(sms_narrative) or str(sms_narrative).strip() == "":
         return "⚠️ Suspense Profile", "4999", "UNCLASSIFIED ROW", 0.0, "Exempt"
     text = str(sms_narrative).upper()
@@ -109,7 +108,7 @@ def generic_zoho_pipeline_classifier(sms_narrative, numeric_valuation):
     # Inward/Outward default fallbacks
     account_code = "4999"
     
-    if "SYSTEM ALERT" in text or "SECURITY CODE" in text:
+    if "SYSTEM_ALERT_NOTIFICATION" in text or "SECURITY CODE" in text:
         return "⚠️ System Alert Profile", "9999", "SYSTEM ALERT MATRIX", 0.0, "Exempt"
         
     # Catch Cleaned Internal Sorters instantly
@@ -193,7 +192,6 @@ def execute_universal_etl_pipeline(raw_df):
     """Parses dynamic columns, extracts global sales tax allocations, and configures Zoho sheets."""
     col_map = trace_file_column_indices(raw_df.columns)
     processed_df = pd.DataFrame()
-    
     if col_map['date'] is not None:
         processed_df['Transaction Date'] = pd.to_datetime(raw_df.iloc[:, col_map['date']]).dt.strftime('%Y-%m-%d')
     else:
@@ -210,6 +208,7 @@ def execute_universal_etl_pipeline(raw_df):
     else:
         processed_df['Signed_Amount'] = processed_df['Raw_Description'].apply(adaptive_monetary_parser)
         
+    # 🌟 MINUS/POSITIVE POLARITY INTERCEPTOR OVERRIDE BLOCK
     deduction_triggers = ["debited", "withdrawal", "payment for", "trx. of", "transaction of"]
     processed_df['Signed_Amount'] = np.where(
         processed_df['Raw_Description'].str.contains('|'.join(deduction_triggers), case=False, na=False) & 
@@ -218,19 +217,24 @@ def execute_universal_etl_pipeline(raw_df):
         processed_df['Signed_Amount'].abs()
     )
     
+    # Explicit Statement Inflows Polarity Correction Override
+    processed_df['Signed_Amount'] = np.where(
+        processed_df['Raw_Description'].str.contains("credited|profit of|salary of", case=False, na=False),
+        processed_df['Signed_Amount'].abs(),
+        processed_df['Signed_Amount']
+    )
+    
     processed_df['Reference Number'] = raw_df.iloc[:, col_map['ref']] if col_map['ref'] is not None else ""
     processed_df['Payee/Vendor'] = raw_df.iloc[:, col_map['payee']] if col_map['payee'] is not None else "Global Ledger Account"
     
-    # 🏁 UNPACKING TUPLE UNIFIED PASSTHROUGH FIX
     classification_results = [
         generic_zoho_pipeline_classifier(row['Description'], row['Signed_Amount']) 
         for _, row in processed_df.iterrows()
     ]
     
-    # Safely unpack individual array indices from classification results tuple
-    processed_df['Zoho_Account_Code'] = [r[1] for r in classification_results]
-    processed_df['Tax Rate'] = [float(r[3]) for r in classification_results] # 🛠️ CRITICAL HOTFIX: Forced Type Casting to Float
-    processed_df['Tax Name'] = [r[4] for r in classification_results]
+    processed_df['Zoho_Account_Code'] = [r for r in classification_results]
+    processed_df['Tax Rate'] = [float(r) for r in classification_results]
+    processed_df['Tax Name'] = [r for r in classification_results]
     
     processed_df['Absolute_Gross'] = processed_df['Signed_Amount'].abs()
     processed_df['Net Amount'] = (processed_df['Absolute_Gross'] / (1.0 + processed_df['Tax Rate'])).round(2)
