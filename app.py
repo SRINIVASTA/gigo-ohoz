@@ -306,4 +306,4 @@ else:
         )
         
         with st.expander("🛠️ Advanced Ingestion Metadata Mapping Logs", expanded=False):
-            st.json({k: (f"Detected at column index [{v}] ({raw_data.columns[v]})" if v is not None else "Missing - Using Fallback Parsing Engine") for k, v in dynamic_layout_indices.items()})
+            st.json({k: (f"Detected at column index [{v}] ({raw_input_df.columns[v]})" if v is not None else "Missing - Using Fallback Parsing Engine") for k, v in dynamic_layout_indices.items()})
