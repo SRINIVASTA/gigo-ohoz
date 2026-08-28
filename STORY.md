@@ -9,7 +9,7 @@ This file outlines my complete market positioning, B2B sales pipelines, website 
 ## 🎯 My Value Proposition Sorter
 When pitching to clients, I must strictly position this tool around three high-value business transformations:
 1. **Total Elimination of Manual Labor:** Turning hours of monthly bank data entry into a 2-second upload file.
-2. **100% Tax Ingestion Accuracy:** Automatically calculating net transaction bases and isolating 5% VAT or GST variables without typos.
+2. **100% Tax Ingestion Accuracy:** Automatically calculating net transaction bases and isolating localized VAT or GST variables without typos.
 3. **Stateless Compliance Security:** Providing absolute data privacy via a zero-disk footprint processing protocol.
 
 ---
@@ -40,6 +40,21 @@ Our dynamic, header-agnostic parser immediately locates shuffled column boundari
 I understand that your bank statement is the financial heart of your company. That is why this portal enforces a strict stateless security policy:
 *   **100% Pure RAM Processing:** Uploaded files are processed strictly inside volatile browser memory. Not a single row or vendor details ever touches a physical server disk.
 *   **Instant Session Purge:** The very second you close or refresh your active browser tab, your transaction records completely vanish from the cloud architecture. 
+
+---
+
+## 🌍 My Adaptive Country-Jurisdiction Pivot (B2B Selling Angle)
+
+*This is the core storytelling element I build into my landing pages and sales pitches to prove global adaptability:*
+
+The true genius of the engine lies in its ability to bend to global compliance standards on the fly without forcing manual user configuration adjustments. By evaluating your license key strings instantly in transient memory loops, the interface undergoes an automatic structural transformation based on regional key tags:
+
+*   **The India Ingestion Pass (`-IN-` Key Flag):** The moment the system detects an Indian footprint, it pivots the dashboard directly into the **India Tax Jurisdiction**. It instantly converts all ledger cards to scale under **INR** parameters and maps your tax fields explicitly to native **GST** rulesets.
+*   **The United States Ingestion Pass (`-US-` Key Flag):** For American corporate structures, the engine adapts seamlessly into the **United States Jurisdiction**, switching your global accounting parameters to use **USD** currency valuations and isolating **Sales Tax** metrics cleanly.
+*   **The United Kingdom Ingestion Pass (`-UK-` / `-GB-` Key Flag):** When handling British or UK-managed ledgers, the platform steps into the **United Kingdom Jurisdiction**, locking your display metrics to **GBP** scales and configuring tax back-outs under strict **UK VAT** guidelines.
+*   **The Global Ingestion Pass (Fallback Baseline):** If no matching regional footprint is found, the system uses its baseline default wrapper—the **Global Operations Gateway**, running native **AED** currency tracking parameters and standard **VAT** extraction fields.
+
+This dynamic routing layer means my sales pitch is always localized. I don't need to ask you what country your business operates in; your key configuration token silently adapts the portal fields for your native tax authority in real-time.
 
 ---
 
