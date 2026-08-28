@@ -5,6 +5,16 @@ An enterprise-grade, country-adaptive **automated financial ingestion dashboard 
 By subverting the traditional **GIGO (Garbage In, Garbage Out)** paradigm, this platform intercepts chaotic, poorly formatted data packets (Garbage In), normalizes structural noise, handles variable token maps dynamically on the fly, and outputs a pristine, transaction-level vector upload package (Purified Out) mapped directly to your financial specifications.
 
 ---
+## 🔒 Zero Data Saving Architecture (Transient In-Memory ETL)
+
+To ensure strict compliance with global corporate financial privacy mandates, this portal enforces a strict **Zero Data Saving (Stateless)** execution profile:
+
+* **Pure RAM Processing:** Uploaded files ingested via `st.file_uploader` are held strictly within transient memory (RAM) buffer arrays.
+* **No Disk Tracking:** The backend ETL engine (`data_pipe.py`) performs all normalization, token extractions, and split-vector calculations entirely in-memory. No raw data, logs, or intermediate spreadsheet rows are ever written to local server disk storage.
+* **Instant Session Purge:** The moment a user closes or refreshes their browser viewport tab, all transaction matrices are immediately wiped out of the active runtime state. 
+* **Zero Asset Persistence:** Because no persistent files are ever generated on the server side, a root `.gitignore` file for data protection is completely non-required for cloud deployment.
+
+---
 
 ## 📈 System Architecture
 
@@ -13,7 +23,6 @@ The project utilizes a decoupled, split-architecture design to isolate tax-aware
 ```text
 📁 gigo-ohoz/
 │
-├── 📄 .gitignore                 # Strict data logs & secrets exclusion ruleset
 ├── 📄 app.py                     # Front-end workspace UI viewport presentation layer
 ├── 📄 data_pipe.py               # Back-end Zoho vector splitter & tax calculation engine
 ├── 📄 README.md                  # System operation & architectural documentation
