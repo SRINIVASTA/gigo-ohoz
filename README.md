@@ -1,21 +1,22 @@
 # 📊 gigo-ohoz | Universal Zoho Books Ingestion Portal
 
-An enterprise-grade, country-adaptive **automated financial ingestion dashboard & ETL engine** built specifically for Zoho Books. 
+An enterprise-grade, country-adaptive **automated financial ingestion dashboard & ETL engine** built specifically for Zoho Books imports. 
 
-By subverting the traditional **GIGO (Garbage In, Garbage Out)** paradigm, this platform ingests chaotic, poorly formatted bank transaction logs and SMS data packets, automatically standardizes currency/decimal notations, extracts hidden tax bases, and outputs a pristine `.xlsx` upload package mapped directly to Zoho's split-vector specifications.
+By subverting the traditional **GIGO (Garbage In, Garbage Out)** paradigm, this platform intercepts chaotic, poorly formatted data packets (Garbage In), normalizes structural noise, handles variable token maps dynamically on the fly, and outputs a pristine, transaction-level vector upload package (Purified Out) mapped directly to your financial specifications.
 
 ---
 
 ## 📈 System Architecture
 
-The project utilizes a decoupled, split-architecture design to isolate tax-aware core logic from presentation layouts:
+The project utilizes a decoupled, split-architecture design to isolate tax-aware core calculation data models from presentation layouts:
 
 ```text
 📁 gigo-ohoz/
 │
-├── 📄 .gitignore                 # Strict data & secrets exclusion ruleset
+├── 📄 .gitignore                 # Strict data logs & secrets exclusion ruleset
 ├── 📄 app.py                     # Front-end workspace UI viewport presentation layer
 ├── 📄 data_pipe.py               # Back-end Zoho vector splitter & tax calculation engine
+├── 📄 README.md                  # System operation & architectural documentation
 └── 📄 requirements.txt           # Explicit python dependency manifest file
 ```
 
@@ -23,14 +24,50 @@ The project utilizes a decoupled, split-architecture design to isolate tax-aware
 
 ## ✨ Core Features
 
-* **Double Footprint Accounting Audits:** Your KPI dashboard explicitly tracks and cross-references **Total Raw Excel Rows** directly against your **Cleaned Mapped Transactions**, exposing the precise line-item delta skipped during cleanup filters.
-* **Header-Agnostic Fuzzy Parsing:** Intelligently maps column positions dynamically, targeting variable keys like `Date`, `SMS text lines`, and `Amount` configurations without template structural lock-ins.
-* **Resilient Monetary Normalization:** Strips text noise, localized letters, currency prefixes (`AED`, `INR`, `USD`), and sanitizes European punctuation markings on the fly.
-* **Zoho Absolute Vector Splitting:** Converts signed positive/negative items instantly into split absolute payments and deposits scalars to fulfill native Zoho template guidelines.
-* **Jurisdiction-Aware Tax Splitter:** Reads fractional rates from secure metadata keys, backed out internally using mathematical base scaling algorithms: `Net = Gross / (1 + Rate)`.
-* **Cryptographic Firewall Perimeter:** Enforces a severe, state-managed authentication token wrapper gate that immediately blocks underlying logic compilation until a valid token string is verified.
+* **Double Footprint Accounting Audits:** The dashboard tracks and cross-references **Total Raw Rows** directly against **Cleaned Mapped Transactions**, exposing the exact line-item delta skipped during data parsing.
+* **Text-to-Column Extraction Engine:** Strips out unformatted bank conversational SMS notification messages and extracts clean data parameters into structured relational tables (separating Date, Amount, Type, and Merchant).
+* **Zoho Absolute Vector Splitting:** Automatically maps out signed positive and negative records, sorting them into separate, explicit `Debit (Payments)` and `Credit (Deposits)` absolute column fields to comply with native Zoho Books banking template guidelines.
+* **Jurisdiction-Aware Tax Splitter:** Evaluates mathematical base scaling algorithms to back out internal fractional tax weights: `Net Amount = Gross / (1 + Rate)`.
+* **Zero-Accounting Fallback Filters:** Automatically segregates non-monetary system logs (like bank OTP strings, service notifications, or welcome greetings) into a temporary workspace holding pool.
+* **Cryptographic Firewall Perimeter:** Enforces a secure, state-managed authentication token gateway that blocks underlying application execution until a valid token string is verified.
 
 ---
+
+## 🗂️ Live Statement Operation Panel Sorter
+
+The engine separates your workflow into four layouts. **Panel 1 provides your primary upload vector**, while **Panels 2 through 4 are provided strictly for user viewing, local data auditing, and manual verification purposes**:
+
+### 1. 🟢 Zoho Books Import Layout (`.csv` / `.xlsx`) 
+* **Zoho Ingestion Route:** `Banking -> Import Statement`
+* **Execution Status:** **REQUIRED FOR UPLOAD.**
+* **GIGO Ingestion Mode:** **Data Output Vector.** 
+* **Description:** This is the *only* file uploaded to Zoho Books. It contains a flat, row-by-row matrix of individual financial entries. All raw text message clutter is removed.
+* **Ingestion Parameter Mapping:**
+  * `Transaction Date` ➡️ Transaction Date
+  * `Description` ➡️ Description
+  * `Debit (Payments)` ➡️ Withdrawals / Expense
+  * `Credit (Deposits)` ➡️ Deposits / Income
+  * `Reference Number` ➡️ Reference Number
+  * *Note: Extra reference fields such as `Zoho_Account_Code` and `Tax Name` are completely skipped and ignored by the database engine on upload.*
+
+### 2. ❌ Balance Verification Audit
+* **Zoho Ingestion Route:** *None (Keep Local Workspace View)*
+* **Execution Status:** **USER VIEWING ONLY (DO NOT UPLOAD).**
+* **GIGO Ingestion Mode:** **Audit Verification Pass.**
+* **Description:** An interactive dashboard view tracking cumulative net financial balance checks (e.g., target balance changes). It is provided strictly for you to view and check calculations against your banking portal totals before pushing entries into Zoho.
+
+### 3. ❌ Global Ledger Spend & Activity Sorter
+* **Zoho Ingestion Route:** *None (Keep Local Workspace View)*
+* **Execution Status:** **USER VIEWING ONLY (DO NOT UPLOAD).**
+* **GIGO Ingestion Mode:** **Analytical Sorter View.**
+* **Description:** Provides a management overview report tracking percentage weights across ledger accounts. It serves as an interactive data filter tool for you to review spend allocations and spot high-volume activity buckets.
+
+### 4. ❌ Advanced Ingestion Metadata Mapping Logs
+* **Zoho Ingestion Route:** *None (Keep Local Workspace View)*
+* **Execution Status:** **USER VIEWING ONLY (DO NOT UPLOAD).**
+* **GIGO Ingestion Mode:** **ETL Pipeline Map.**
+* **Description:** A live script execution map displaying exactly where headers and token arrays (`date`, `amount`, `text`, `ref`, `payee`) were located inside your raw sheet. It is provided for your reference to verify data-line lineage without cluttering Zoho Books.
+
 ---
 
 ## 🚀 Quick Start Deployment Execution
@@ -40,19 +77,18 @@ The project utilizes a decoupled, split-architecture design to isolate tax-aware
    git init gigo-ohoz
    cd gigo-ohoz
    ```
-2. Setup and install package bins using your terminal session execution panel:
+2. Setup and install required package bins using your terminal session execution panel:
    ```bash
    pip install -r requirements.txt
    ```
-3. Boot up the Streamlit processing server instance:
+3. Boot up the Streamlit engine processing server instance:
    ```bash
    streamlit run app.py
    ```
-4. Access your secure ingestion viewport panel on your native local desktop desktop (`http://localhost:8501`).
 
 ---
 
 ## 🛡️ Cloud-Native Security Design
 
-* **De-coupled Architecture:** UI code layouts are isolated entirely from structural accounting models to safeguard calculation arrays from style block refactors.
-* **Exclusion Control Mandate:** Local storage verification sheets, raw text data spreadsheets, and cloud configurations files must be stringently blocked within the root `.gitignore` tracking schema parameters.
+* **De-coupled Architecture:** Core backend calculation logic files are fully isolated from presentation viewport layouts to secure internal account parsing parameters from style adjustments.
+* **Exclusion Control Mandate:** Local storage verification sheets, raw text data spreadsheets, and testing environment files must be stringently blocked within the root `.gitignore` configuration tracking file to prevent leaks.
