@@ -308,18 +308,53 @@ else:
         with st.expander("🛠️ Advanced Ingestion Metadata Mapping Logs", expanded=False):
             st.json({k: (f"Detected at column index [{v}] ({raw_input_df.columns[v]})" if v is not None else "Missing - Using Fallback Parsing Engine") for k, v in dynamic_layout_indices.items()})
 
-[server]
-headless = true
-address = "0.0.0.0"
-port = 8501
-maxUploadSize = 25
-
-[theme]
-primaryColor = "#FF4B4B"
-backgroundColor = "#0E1117"
-secondaryBackgroundColor = "#262730"
-textColor = "#FAFAFA"
-font = "sans serif"
-
-[client]
-showErrorDetails = false
+# =============================================================================
+# --- 7. ABSOLUTE LAST LINE OF APP.PY (GUARANTEED EXECUTING IN BOTH STATES) ---
+# =============================================================================
+st.markdown( 
+ """ 
+ <style> 
+ .footer { 
+     position: fixed; 
+     left: 0; 
+     bottom: 0; 
+     width: 100%; 
+     background-color: #262730; 
+     color: #FAFAFA; 
+     text-align: center; 
+     font-size: 13px; 
+     padding: 12px 0; 
+     z-index: 9999999 !important; 
+     border-top: 1px solid #FF4B4B; 
+ } 
+ .footer a { 
+     color: #FF4B4B; 
+     text-decoration: none; 
+     margin: 0 10px; 
+     font-weight: bold; 
+ } 
+ .footer a:hover { 
+     text-decoration: underline; 
+     color: #FAFAFA; 
+ } 
+ .footer-separator { 
+     color: #666; 
+     margin: 0 5px; 
+ } 
+ [data-testid="stMainBlockContainer"] { 
+     padding-bottom: 120px !important; 
+ } 
+ .main .block-container {
+     padding-bottom: 120px !important;
+ }
+ </style> 
+ <div class="footer"> 
+     <span><strong>© 2026 T A Srinivas.</strong> All Rights Reserved. Prototype for portfolio display. For commercial licensing requests, please use the contact channels.</span> 
+     <span class="footer-separator">|</span> 
+     <a href="https://www.linkedin.com/in/srinivas-t-a-557637119/" target="_blank">LinkedIn Profile</a> 
+     <span class="footer-separator">|</span> 
+     <a href="mailto:tasrinivass@gmail.com">Contact Me</a> 
+ </div> 
+ """, 
+ unsafe_allow_html=True 
+)
