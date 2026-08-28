@@ -307,3 +307,19 @@ else:
         
         with st.expander("🛠️ Advanced Ingestion Metadata Mapping Logs", expanded=False):
             st.json({k: (f"Detected at column index [{v}] ({raw_input_df.columns[v]})" if v is not None else "Missing - Using Fallback Parsing Engine") for k, v in dynamic_layout_indices.items()})
+
+[server]
+headless = true
+address = "0.0.0.0"
+port = 8501
+maxUploadSize = 25
+
+[theme]
+primaryColor = "#FF4B4B"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#262730"
+textColor = "#FAFAFA"
+font = "sans serif"
+
+[client]
+showErrorDetails = false
