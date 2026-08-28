@@ -41,6 +41,16 @@ The project utilizes a decoupled, split-architecture design to isolate tax-aware
 * **Cryptographic Firewall Perimeter:** Enforces a secure, state-managed authentication token gateway that blocks underlying application execution until a valid token string is verified.
 
 ---
+## 🗺️ Country-Adaptive Framework Routing Logic
+
+When an authorized user submits a license key, the system skips double-login overhead and instantly adapts your dashboard parameters based on the structural string format:
+
+* **India Ingestion Pass (`-IN-` Key Flag):** Switches the active framework to **India Tax Jurisdiction**, updating dashboard baseline metrics to **INR** currency scalars and **GST** extraction fields.
+* **United States Ingestion Pass (`-US-` Key Flag):** Switches the active framework to **United States Jurisdiction**, updating dashboard baseline metrics to **USD** currency scalars and **Sales Tax** extraction fields.
+* **United Kingdom Ingestion Pass (`-UK-` / `-GB-` Key Flag):** Switches the active framework to **United Kingdom Jurisdiction**, updating dashboard baseline metrics to **GBP** currency scalars and **UK VAT** extraction fields.
+* **Global Ingestion Pass (Fallback Baseline):** Defaults the active framework to **Global Operations Gateway**, running standard **AED** currency tracking scales and **VAT** tax fields.
+
+---
 
 ## 🗂️ Live Statement Operation Panel Sorter
 
