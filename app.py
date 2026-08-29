@@ -17,7 +17,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-
 # ==============================================================================
 # 2. FORCE STREAMLIT CHROMIUM HIDING LAYERS & GAP FIX
 # ==============================================================================
@@ -103,77 +102,82 @@ else:
         st.session_state.detected_location = None
         st.rerun()
 
+# ==============================================================================
+# MASTER SECURITY FIREWALL INTERCEPTOR
+# ==============================================================================
 if not st.session_state.authenticated:
+    # --- Renders ONLY the Unauthorized Lock Screen Screen elements ---
     st.title("🔒 GIGO-OHOZ | Ingestion & Tax Extraction Engine")
     st.warning("### **Access Unauthorized**")
     st.markdown("This database conversion tool is protected by localized country accounting wrappers. Enter a valid software authorization key in the left Control Console sidebar to switch into regional mode.")
-    st.stop()
-# ==============================================================================
-# 3. CONTROL CONSOLE WORKSPACE LAYER (RUNS ONLY WHEN AUTHENTICATED)
-# ==============================================================================
-with st.sidebar:
-    st.markdown("## **Control Console**")
-    st.markdown(f"Processing local bank feeds format structure cleanly to **Zoho Books** standards under **{st.session_state.tax_label}** parameters.")
-    st.markdown("---")
-    
-    uploaded_file = st.file_uploader(
-        "⚡ Ingest Transaction Profile File", 
-        type=["csv", "xlsx", "xls", "txt"],
-        help="Supports generic banking rows, SMS sheets, or standard statement data."
-    )
-    st.markdown("---")
-    st.markdown("### **System Status**")
-    if uploaded_file is not None:
-        st.info("🟢 File loaded successfully. Ready for processing pass.")
+
     else:
-        st.warning("⚠️ Awaiting financial source file upload wrapper...")
-
-if uploaded_file is None:
-    st.title(f"📊 Zoho Books Financial Data Ingestion Dashboard ({st.session_state.currency})")
-    st.markdown("Welcome to the dynamic Zoho accounting ledger pipeline suite. Upload raw files to clear text noise, map accounting codes, and compute automated localized tax breakdowns on the fly.")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.info(f"#### ⚙️ In-Country Processing Features\n"
-                f"* **Fuzzy Field Matcher:** Maps messy bank data layouts seamlessly.\n"
-                f"* **Tax Splitter Engine:** Automatically extracts tax elements from composite totals based on chart configurations.\n"
-                f"* **Zoho Vector Balancer:** Splits signed positive/negative structures into scalar payments and deposits fields.")
-    with col2:
-        st.info("#### 🛡️ Cloud-Native Security Design\n"
-                "* **Isolated Logic Architecture:** Script calculation structures are segregated from presentation modules.\n"
-                "* **Encrypted Secrets Allocation:** Mapping dictionaries are securely isolated out of source control footprints.")
-else:
-    file_name = uploaded_file.name
-    file_ext = re.sub(r'.*(\..*)$', r'\1', file_name).lower()
-    raw_input_df = None
-    
-    try:
-        if file_ext in ['.xlsx', '.xls']:
-            excel_file_object = pd.ExcelFile(uploaded_file)
-            sheet_names_list = excel_file_object.sheet_names
-            if len(sheet_names_list) > 1:
-                selected_sheet = st.sidebar.selectbox("📁 Target Sheet Selection Panel:", options=sheet_names_list)
-                raw_input_df = pd.read_excel(uploaded_file, sheet_name=selected_sheet)
-            else:
-                raw_input_df = pd.read_excel(uploaded_file, sheet_name=0)
-        elif file_ext == '.csv':
-            raw_input_df = pd.read_csv(uploaded_file)
+    # ==============================================================================
+    # 3. CONTROL CONSOLE WORKSPACE LAYER (RUNS ONLY WHEN AUTHENTICATED)
+    # ==============================================================================
+    with st.sidebar:
+        st.markdown("## **Control Console**")
+        st.markdown(f"Processing local bank feeds format structure cleanly to **Zoho Books** standards under **{st.session_state.tax_label}** parameters.")
+        st.markdown("---")
+        
+        uploaded_file = st.file_uploader(
+            "⚡ Ingest Transaction Profile File", 
+            type=["csv", "xlsx", "xls", "txt"],
+            help="Supports generic banking rows, SMS sheets, or standard statement data."
+        )
+        st.markdown("---")
+        st.markdown("### **System Status**")
+        if uploaded_file is not None:
+            st.info("🟢 File loaded successfully. Ready for processing pass.")
         else:
-            raw_input_df = pd.read_csv(uploaded_file, sep=None, engine='python')
-    except Exception as e:
-        st.error(f"Critical Ingestion Error: {e}")
+            st.warning("⚠️ Awaiting financial source file upload wrapper...")
+
+    if uploaded_file is None:
+        st.title(f"📊 Zoho Books Financial Data Ingestion Dashboard ({st.session_state.currency})")
+        st.markdown("Welcome to the dynamic Zoho accounting ledger pipeline suite. Upload raw files to clear text noise, map accounting codes, and compute automated localized tax breakdowns on the fly.")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info(f"#### ⚙️ In-Country Processing Features\n"
+                    f"* **Fuzzy Field Matcher:** Maps messy bank data layouts seamlessly.\n"
+                    f"* **Tax Splitter Engine:** Automatically extracts tax elements from composite totals based on chart configurations.\n"
+                    f"* **Zoho Vector Balancer:** Splits signed positive/negative structures into scalar payments and deposits fields.")
+        with col2:
+            st.info("#### 🛡️ Cloud-Native Security Design\n"
+                    "* **Isolated Logic Architecture:** Script calculation structures are segregated from presentation modules.\n"
+                    "* **Encrypted Secrets Allocation:** Mapping dictionaries are securely isolated out of source control footprints.")
+    else:
+        file_name = uploaded_file.name
+        file_ext = re.sub(r'.*(\..*)$', r'\1', file_name).lower()
         raw_input_df = None
-
-    if raw_input_df is not None:
-        # 🧾 NEW STEP: Capture the absolute total rows inside the original Excel sheet
-        total_raw_excel_rows = len(raw_input_df)
-
-        final_zoho_df, reconciliation_df, global_distribution_df, dynamic_layout_indices, signed_amounts_series = execute_universal_etl_pipeline(raw_input_df)
         
-        grand_total_rows = int(global_distribution_df["Total_Row_Count"].sum())
-        total_activity_weight = global_distribution_df["Global Ledger Activity Weight (%)"].sum()
-        
-        totals_row = pd.DataFrame([{
+        try:
+            if file_ext in ['.xlsx', '.xls']:
+                excel_file_object = pd.ExcelFile(uploaded_file)
+                sheet_names_list = excel_file_object.sheet_names
+                if len(sheet_names_list) > 1:
+                    selected_sheet = st.sidebar.selectbox("📁 Target Sheet Selection Panel:", options=sheet_names_list)
+                    raw_input_df = pd.read_excel(uploaded_file, sheet_name=selected_sheet)
+                else:
+                    raw_input_df = pd.read_excel(uploaded_file, sheet_name=0)
+            elif file_ext == '.csv':
+                raw_input_df = pd.read_csv(uploaded_file)
+            else:
+                raw_input_df = pd.read_csv(uploaded_file, sep=None, engine='python')
+        except Exception as e:
+            st.error(f"Critical Ingestion Error: {e}")
+            raw_input_df = None
+
+        if raw_input_df is not None:
+            # 🧾 NEW STEP: Capture the absolute total rows inside the original Excel sheet
+            total_raw_excel_rows = len(raw_input_df)
+
+            final_zoho_df, reconciliation_df, global_distribution_df, dynamic_layout_indices, signed_amounts_series = execute_universal_etl_pipeline(raw_input_df)
+            
+            grand_total_rows = int(global_distribution_df["Total_Row_Count"].sum())
+            total_activity_weight = global_distribution_df["Global Ledger Activity Weight (%)"].sum()
+            
+            totals_row = pd.DataFrame([{
             'Zoho_Account_Code': 'TOTALS',
             'Ledger Category Title Sorter Name': 'Grand Total Summary Slices',
             'Net_Balance': signed_amounts_series.sum(),
