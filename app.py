@@ -111,7 +111,7 @@ if not st.session_state.authenticated:
     st.warning("### **Access Unauthorized**")
     st.markdown("This database conversion tool is protected by localized country accounting wrappers. Enter a valid software authorization key in the left Control Console sidebar to switch into regional mode.")
 
-    else:
+else:
     # ==============================================================================
     # 3. CONTROL CONSOLE WORKSPACE LAYER (RUNS ONLY WHEN AUTHENTICATED)
     # ==============================================================================
@@ -169,7 +169,7 @@ if not st.session_state.authenticated:
             raw_input_df = None
 
         if raw_input_df is not None:
-            # 🧾 NEW STEP: Capture the absolute total rows inside the original Excel sheet
+            # 🧾 Capture the absolute total rows inside the original Excel sheet
             total_raw_excel_rows = len(raw_input_df)
 
             final_zoho_df, reconciliation_df, global_distribution_df, dynamic_layout_indices, signed_amounts_series = execute_universal_etl_pipeline(raw_input_df)
