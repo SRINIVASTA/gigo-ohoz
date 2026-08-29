@@ -1,4 +1,11 @@
 import streamlit as st
+import pandas as pd
+import numpy as np
+import re
+import io
+import plotly.express as px
+import logging
+from data_pipe import execute_universal_etl_pipeline
 
 # ==============================================================================
 # 1. INITIAL POSITION PAGE SPECIFICATIONS (MUST BE EXECUTED FIRST)
@@ -10,13 +17,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-import pandas as pd
-import numpy as np
-import re
-import io
-import plotly.express as px
-import logging
-from data_pipe import execute_universal_etl_pipeline
 
 # ==============================================================================
 # 2. FORCE STREAMLIT CHROMIUM HIDING LAYERS & GAP FIX
